@@ -1,0 +1,140 @@
+HAROON & SONS LARAVEL UPDATE - INSTALLATION GUIDE
+=================================================
+
+IMPORTANT
+---------
+- Is update mein database reset nahi karna.
+- Kabhi bhi `php artisan migrate:fresh`, `php artisan db:wipe`, ya rollback mat chalana.
+- Updated package mein security ki wajah se real `.env` file include nahi hai.
+- Apni purani `.env` file ko backup se copy karke updated project mein rakho.
+- Existing MySQL database aur admin account ko preserve rakho.
+- Existing `storage/app/public` uploads ko backup zaroor rakho.
+
+1) BACKUP
+---------
+1. XAMPP Control Panel mein Apache/MySQL ko filhal chalne do; Laravel server stop karne ke liye terminal mein Ctrl+C karo.
+2. Apne current project folder ka backup banao, including `.env` and `storage/app/public`.
+3. Updated ZIP ko ek nayi folder location mein extract karo, ya current folder replace karne se pehle complete backup lo.
+
+2) ENV FILE
+-----------
+Agar updated folder mein `.env` nahi hai:
+- Backup folder se apni purani `.env` copy karke updated project root mein paste karo.
+- Purani APP_KEY ko change mat karna.
+- `.env` mein ye settings verify karo:
+
+APP_URL=http://127.0.0.1:8000
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3307
+DB_DATABASE=haroonandsons
+DB_USERNAME=root
+DB_PASSWORD=
+SESSION_DRIVER=file
+CACHE_STORE=file
+QUEUE_CONNECTION=sync
+FILESYSTEM_DISK=public
+
+Agar tumhare MySQL ka port ya password alag hai to apni working existing values hi rakho.
+Agar purani `.env` bilkul available nahi hai tab `.env.example` ko `.env` copy karo, apni DB settings bharo, phir `php artisan key:generate` chalao.
+Existing APP_KEY ko bina zaroorat regenerate na karna.
+
+3) WINDOWS POWERSHELL COMMANDS
+------------------------------
+PowerShell mein project root par jao. Example:
+
+cd F:\haroonandsons-laravel
+
+Composer dependencies install/verify:
+
+composer install
+
+Laravel caches clear:
+
+php artisan optimize:clear
+
+New post-video columns add karne ke liye safe migration:
+
+php artisan migrate
+
+Public uploaded images/videos ke liye storage link:
+
+php artisan storage:link
+
+Routes verify:
+
+php artisan route:list
+
+Website start:
+
+php artisan serve
+
+Browser:
+
+http://127.0.0.1:8000
+
+IMPORTANT: `php artisan migrate` sirf pending migration chalata hai. `migrate:fresh` mat chalana.
+
+4) LARGE VIDEO UPLOAD SETTINGS (XAMPP)
+--------------------------------------
+XAMPP Control Panel > Apache > Config > PHP (php.ini) open karo.
+Agar artisan serve ke liye CLI PHP alag php.ini use kar raha ho to PowerShell mein:
+
+php --ini
+
+Loaded Configuration File wali php.ini ko edit karo. Ye settings set karo:
+
+upload_max_filesize = 2048M
+post_max_size = 2100M
+max_execution_time = 0
+max_input_time = 0
+memory_limit = 512M
+max_file_uploads = 30
+
+File save karo. XAMPP Apache restart karo. Terminal/PowerShell mein running `php artisan serve` ko bhi Ctrl+C karke dobara start karo.
+
+No application-level video size limit is set in the post form. Lekin technically koi upload truly unlimited nahi hota: PHP, web server, disk space, filesystem, browser, and available memory/time impose limits. Upar wali settings approx 2 GB tak allow karti hain, provided disk space is available.
+
+5) WEBSITE FEATURES
+-------------------
+- Website bottom-right language switch: English / 中文.
+- Static website text uses English and Simplified Chinese language files.
+- Post title, excerpt, content, category, SEO title and meta description each have English + Chinese fields.
+- Chinese fields are optional; if empty, English text is used as fallback.
+- Post video is uploaded in the same Create Post/Edit Post form.
+- A post's image/gallery and attached video appear together on its public post page.
+- Public post page includes Like/Unlike, customer review (1-5 stars), and comments.
+- Reviews/comments are pending until approved from Admin > Customer reviews / Comments.
+- Admin Analytics counts videos attached to posts.
+- Old `videos` database table and old files are left untouched for safety, but the separate video upload menu/routes are removed from the new workflow.
+
+6) TEST CHECKLIST
+-----------------
+1. Login to /admin/login.
+2. Open Create post.
+3. Fill English and Chinese title, excerpt, content, category.
+4. Select a featured image and optionally a gallery.
+5. Select an optional MP4/MOV/WebM video in the same form.
+6. Publish the post.
+7. Open Latest Updates and the post detail page.
+8. Switch to 中文 from the bottom-right floating control; post fields and static page labels should change to Chinese.
+9. Submit a Like, a Review and a Comment as a public visitor.
+10. Open Admin > Customer reviews and Admin > Comments and approve them.
+11. Reload the public post; approved reviews/comments should now appear.
+
+7) IF SOMETHING DOES NOT WORK
+-----------------------------
+Run:
+
+php artisan optimize:clear
+php artisan route:list
+php artisan migrate:status
+
+Check PHP extensions:
+
+php -m
+
+For database connection, verify MySQL is running and DB_PORT / DB_DATABASE / DB_USERNAME / DB_PASSWORD match your existing working `.env`.
+For missing uploaded files, verify `storage/app/public` exists and `public/storage` points to it.
+
+Never send your `.env` file or database password in chat.
